@@ -1,166 +1,149 @@
 <template>
   <v-app id="main">
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
-      <v-toolbar-title class="font-weight-bold">MeetingsNow</v-toolbar-title>
-      <v-spacer></v-spacer>
+    <v-app-bar app color="primary" dark>
+      <!-- <v-toolbar-title class="font-weight-bold">MeetingsNow</v-toolbar-title> -->
       <v-btn text @click="locationPicker = !locationPicker">
-        {{ locationString }}
         <v-icon>mdi-map-marker</v-icon>
+        {{ locationString }}
       </v-btn>
+      <v-spacer></v-spacer>
+      <v-menu transition="scroll-y-transition">
+        <template v-slot:activator="{ on }">
+          <v-btn text v-on="on">
+            {{ daysOfWeekStr[dayOfWeek] }}
+            <v-icon>mdi-calendar</v-icon>
+          </v-btn>
+        </template>
+        <v-list color="accent">
+          <v-list-item v-for="day in daysOfWeek" :key="day" @click="dayOfWeek = day">
+            <v-list-item-title class="white--text">{{ daysOfWeekStr[day] }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </v-app-bar>
     <v-content id="bg-container">
-      <!-- day of week/time of day toolbar -->
-      <v-toolbar color="secondary" dark>
-        <v-menu transition="scroll-y-transition">
-          <template v-slot:activator="{ on }">
-            <v-btn text v-on="on">
-              <v-icon>mdi-calendar</v-icon>
-              {{ dayOfWeek }}
-            </v-btn>
-          </template>
-          <v-list color="accent">
-            <v-list-item v-for="day in daysOfWeek" :key="day" @click="dayOfWeek = day">
-              <v-list-item-title class="white--text">{{ day }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-        <v-spacer></v-spacer>
-        <v-menu transition="scroll-y-transition">
-          <template v-slot:activator="{ on }">
-            <v-btn text v-on="on">
-              {{ timeOfDay }}
-              <v-icon>mdi-clock</v-icon>
-            </v-btn>
-          </template>
-          <v-list color="accent">
-            <v-list-item v-for="time in timesOfDay" :key="time" @click="timeOfDay = time">
-              <v-list-item-title class="white--text">{{ time }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-        
-      </v-toolbar>
       <!-- location selection overlay -->
       <v-overlay :value="locationPicker">
         <CityPicker @commitLocation="updateLocation"></CityPicker>
       </v-overlay>
       <!-- div for frame -->
       <div id="listing-frame" show="listingFrame" full-height>
-        <iframe id="the-frame" :src="listingUrl" width="100%" frameborder="0">
-        </iframe>
+        <!-- <iframe id="the-frame" :src="listingUrl" width="100%" frameborder="0">
+        </iframe>-->
       </div>
     </v-content>
     <v-footer app dark color="accent">
       <v-spacer></v-spacer>
-      <span class="white--text">&copy; {{ new Date().getFullYear() }} <a href="https://jddudley.com" target="_blank" class="white--text font-weight-black">JD DUDLEY</a></span>
+      <span class="white--text caption">
+        &copy; {{ new Date().getFullYear() }} 
+        <a href="https://jddudley.com" target="_blank" class="white--text">JD DUDLEY</a>.
+        Listings Manged By Idaho Area 18.
+      </span>
       <v-spacer></v-spacer>
     </v-footer>
   </v-app>
 </template>
 
 <style>
-  body {
-    height: 100%;
-  }
-  #bg-container {
-    background: url('./assets/blue-light.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-  }
-  #the-frame {
-    height: 100vh;
-  }
+body {
+  height: 100%;
+}
+#bg-container {
+  background: url("./assets/blue-light.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+#the-frame {
+  height: 100vh;
+}
 </style>
 
 <script>
-import CityPicker from './components/CityPicker';
+import CityPicker from "./components/CityPicker";
 
 export default {
-  name: 'App',
+  name: "App",
 
   components: {
-    CityPicker,
+    CityPicker
   },
 
   data: () => ({
     locationPicker: false,
     listingFrame: false,
     location: {
-      state: '',
-      city: '',
-      urlSlug: ''
+      state: "",
+      city: "",
+      urlSlug: ""
     },
-    dayOfWeek: 'Thursday',
-    timeOfDay: 'all',
-    meetingData: '',
+    dayOfWeek: 0,
+    dayOfWeekStr: "",
     daysOfWeek: [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday'
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
     ],
-    timesOfDay: [
-      'all',
-      'morning',
-      'midday',
-      'evening',
-      'night'
+    daysOfWeekStr: [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
     ]
   }),
   computed: {
     locationString: function() {
-      if (this.location.state != '' && this.location.city != '') {
+      if (this.location.state != "" && this.location.city != "") {
         // location present
-        return this.location.city  + ", " + this.location.state;
+        return this.location.city + ", " + this.location.state;
       } else {
-        return 'Choose City'
+        return "Choose City";
       }
     },
     dayUrl: function() {
       switch (this.dayOfWeek) {
-        case 'Sunday':
-          return '0';
-        case 'Monday':
-          return '1';
-        case 'Tuesday':
-          return '2';
-        case 'Wednesday':
-          return '3';
-        case 'Thursday':
-          return '4';
-        case 'Friday':
-          return '5';
-        case 'Saturday':
-          return '6';
+        case "Sunday":
+          return "0";
+        case "Monday":
+          return "1";
+        case "Tuesday":
+          return "2";
+        case "Wednesday":
+          return "3";
+        case "Thursday":
+          return "4";
+        case "Friday":
+          return "5";
+        case "Saturday":
+          return "6";
         default:
-          return 'all';
+          return "all";
       }
     },
     timeUrl: function() {
-      if (this.timeOfDay == 'all') {
-        return '';
+      if (this.timeOfDay == "all") {
+        return "";
       } else {
         return this.timeOfDay;
       }
     },
     listingUrl: function() {
       // https://idahoarea18aa.org/meetings?tsml-region=boise&tsml-day=0&tsml-time=morning
-      if (this.location.urlSlug == '') {
-        return '';
+      if (this.location.urlSlug == "") {
+        return "";
       } else {
-        var parameters = '&tsml-day=' + this.dayUrl;
-        if (this.timeUrl != '') {
-          parameters = parameters + '&tsml-time=' + this.timeUrl;
+        var parameters = "&tsml-day=" + this.dayUrl;
+        if (this.timeUrl != "") {
+          parameters = parameters + "&tsml-time=" + this.timeUrl;
         }
-        return this.location.urlSlug + parameters + '#table-wrapper';
+        return this.location.urlSlug + parameters + "#table-wrapper";
       }
     }
   },
@@ -176,31 +159,10 @@ export default {
       localStorage.urlSlug = newLocation.urlSlug;
     }
   },
-  mounted () {
+  mounted() {
     // get day of week
     var dayToday = new Date().getDay();
-    switch (dayToday) {
-      case 0:
-        this.dayOfWeek = 'Sunday';
-        break;
-      case 1:
-        this.dayOfWeek = 'Monday';
-        break;
-      case 2:
-        this.dayOfWeek = 'Tuesday';
-        break;
-      case 3:
-        this.dayOfWeek = 'Wednesday';
-        break;
-      case 4:
-        this.dayOfWeek = 'Thursday';
-        break;
-      case 5:
-        this.dayOfWeek = 'Friday';
-        break;
-      case 6:
-        this.dayOfWeek = 'Saturday';
-    }
+    this.dayOfWeek = dayToday;
     // check local storage for location
     if (localStorage.urlSlug) {
       this.location.state = localStorage.state;
