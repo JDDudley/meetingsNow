@@ -44,18 +44,15 @@
         </v-menu>
         
       </v-toolbar>
-      <v-container fluid>
-        <v-row align="center" justify="center">
-          <v-col>
-          <!-- location selection overlay -->
-          <v-overlay :value="locationPicker">
-            <CityPicker @commitLocation="updateLocation"></CityPicker>
-          </v-overlay>
-          <!-- content -->
-          {{ this.listingUrl }}
-          </v-col>
-        </v-row>
-      </v-container>
+      <!-- location selection overlay -->
+      <v-overlay :value="locationPicker">
+        <CityPicker @commitLocation="updateLocation"></CityPicker>
+      </v-overlay>
+      <!-- div for frame -->
+      <div id="listing-frame" show="listingFrame" full-height>
+        <iframe id="the-frame" :src="listingUrl" width="100%" frameborder="0">
+        </iframe>
+      </div>
     </v-content>
     <v-footer app dark color="accent">
       <v-spacer></v-spacer>
@@ -66,11 +63,17 @@
 </template>
 
 <style>
+  body {
+    height: 100%;
+  }
   #bg-container {
     background: url('./assets/blue-light.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+  }
+  #the-frame {
+    height: 100vh;
   }
 </style>
 
@@ -86,6 +89,7 @@ export default {
 
   data: () => ({
     locationPicker: false,
+    listingFrame: false,
     location: {
       state: '',
       city: '',
@@ -93,6 +97,7 @@ export default {
     },
     dayOfWeek: 'Thursday',
     timeOfDay: 'all',
+    meetingData: '',
     daysOfWeek: [
       'Sunday',
       'Monday',
@@ -152,10 +157,10 @@ export default {
         return '';
       } else {
         var parameters = '&tsml-day=' + this.dayUrl;
-        if (this.timeOfDay != '') {
-          parameters = parameters + '&tsml-tmie=' + this.timeUrl;
+        if (this.timeUrl != '') {
+          parameters = parameters + '&tsml-time=' + this.timeUrl;
         }
-        return this.location.urlSlug + parameters;
+        return this.location.urlSlug + parameters + '#table-wrapper';
       }
     }
   },
@@ -165,7 +170,42 @@ export default {
       this.location.city = newLocation.city;
       this.location.urlSlug = newLocation.urlSlug;
       this.locationPicker = false;
-      this.getMeetings();
+      // record to local storage
+      localStorage.state = newLocation.state;
+      localStorage.city = newLocation.city;
+      localStorage.urlSlug = newLocation.urlSlug;
+    }
+  },
+  mounted () {
+    // get day of week
+    var dayToday = new Date().getDay();
+    switch (dayToday) {
+      case 0:
+        this.dayOfWeek = 'Sunday';
+        break;
+      case 1:
+        this.dayOfWeek = 'Monday';
+        break;
+      case 2:
+        this.dayOfWeek = 'Tuesday';
+        break;
+      case 3:
+        this.dayOfWeek = 'Wednesday';
+        break;
+      case 4:
+        this.dayOfWeek = 'Thursday';
+        break;
+      case 5:
+        this.dayOfWeek = 'Friday';
+        break;
+      case 6:
+        this.dayOfWeek = 'Saturday';
+    }
+    // check local storage for location
+    if (localStorage.urlSlug) {
+      this.location.state = localStorage.state;
+      this.location.city = localStorage.city;
+      this.location.urlSlug = localStorage.urlSlug;
     }
   }
 };
