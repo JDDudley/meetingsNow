@@ -28,8 +28,8 @@
       </v-overlay>
       <!-- div for frame -->
       <div id="listing-frame" show="listingFrame" full-height>
-        <!-- <iframe id="the-frame" :src="listingUrl" width="100%" frameborder="0">
-        </iframe>-->
+        <iframe id="the-frame" :src="listingUrl" width="100%" frameborder="0">
+        </iframe>
       </div>
     </v-content>
     <v-footer app dark color="accent">
@@ -37,7 +37,7 @@
       <span class="white--text caption">
         &copy; {{ new Date().getFullYear() }} 
         <a href="https://jddudley.com" target="_blank" class="white--text">JD DUDLEY</a>.
-        Listings Manged By Idaho Area 18.
+        Listings managed by respective committees.
       </span>
       <v-spacer></v-spacer>
     </v-footer>
@@ -136,14 +136,16 @@ export default {
     },
     listingUrl: function() {
       // https://idahoarea18aa.org/meetings?tsml-region=boise&tsml-day=0&tsml-time=morning
-      if (this.location.urlSlug == "") {
+      if (this.location.urlSlug == '') {
         return "";
+      } else if (this.location.state == 'CA') {
+        return this.location.urlSlug + this.dayOfWeekStr + '.html';
       } else {
         var parameters = "&tsml-day=" + this.dayUrl;
-        if (this.timeUrl != "") {
+        if (this.timeUrl != '') {
           parameters = parameters + "&tsml-time=" + this.timeUrl;
         }
-        return this.location.urlSlug + parameters + "#table-wrapper";
+        return this.location.urlSlug + this.location.cityKey + parameters + "#table-wrapper";
       }
     }
   },
@@ -168,6 +170,9 @@ export default {
       this.location.state = localStorage.state;
       this.location.city = localStorage.city;
       this.location.urlSlug = localStorage.urlSlug;
+    } else {
+      // blank, load city picker
+      this.locationPicker = true;
     }
   }
 };

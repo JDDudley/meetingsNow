@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import ca_cities from '../data/ca_cities.json';
 import id_cities from '../data/id_cities.json';
 import nv_cities from '../data/nv_cities.json';
 import or_cities from '../data/or_cities.json';
@@ -30,11 +31,12 @@ import wy_cities from '../data/wy_cities.json';
 export default {
   name: 'CityPicker',
   data: () => ({
-    chosenState: 'ID',
+    chosenState: '',
     chosenCity: {},
     states: [
       // { text: 'California', value: 'CA' },
       // { text: 'Hawaii', value: 'HI' },
+      { text: 'California', value: 'CA' },
       { text: 'Idaho', value: 'ID' },
       { text: 'Nevada', value: 'NV' },
       { text: 'Oregon', value: 'OR' },
@@ -46,14 +48,17 @@ export default {
       var newLocation = {
         state: this.chosenState,
         city: this.chosenCity.name,
-        urlSlug: this.urlSlug + this.chosenCity.key
+        cityKey: this.chosenCity.key,
+        urlSlug: this.urlSlug
       }
       this.$emit('commitLocation',newLocation)
     }
   },
   computed: {
     cities: function() {
-      if (this.chosenState == 'ID') {
+      if (this.chosenState == 'CA') {
+        return ca_cities.cities;
+      } else if (this.chosenState == 'ID') {
         return id_cities.cities;
       } else if (this.chosenState == 'NV') {
         return nv_cities.cities;
@@ -68,9 +73,18 @@ export default {
     urlSlug: function() {
       if (this.chosenState == 'ID' || this.chosenState == 'NV' || this.chosenState == 'OR' || this.chosenState == 'WY') {
         return 'https://idahoarea18aa.org/meetings?tsml-region=';
+      } else if (this.chosenState == 'CA') {
+        return 'http://aasandiego.org/';
       } else {
         return '';
       }
+    }
+  },
+  mounted () {
+    // check local storage for location
+    if (localStorage.urlSlug) {
+      this.chosenState = localStorage.state;
+      this.chosenCity = localStorage.city;
     }
   }
 };
